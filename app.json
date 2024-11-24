@@ -19,10 +19,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "buildType": "apk",
+      "package": "com.dhanushit419.ScheduleIt"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ce427403-2586-415f-8a17-dcad3660b2d3"
+      }
     }
   }
 }

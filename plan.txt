@@ -1,0 +1,19 @@
+1. User Registration:
+    - Fields: username, roll number, semester number
+    - Action: Save to local storage and verify on next login
+
+2. Tab 1: Dashboard
+    - Displays: Time, classes missed, upcoming classes
+
+3. Tab 2: Profile
+    - Sections:
+      - Name
+      - Links:
+         - Add Course: Select free hours
+         - My Courses: List with delete option
+         - Edit Schedule: Layout (5 days * 8 hours)
+         - Weekly Schedule
+         - Bunk Manager
+         - About Us
+         - CGPA: Display 8 semester GPAs, calculate GPA, store with corresponding semester number in local storage
+         - Reset: Delete all local storage data
