@@ -52,7 +52,7 @@ export default function DashBoard({ navigation }) {
         let a = 0
         parsedData.forEach((row) => {
             console.log(row)
-            a += parseInt(row.classMissed)
+            a += parseInt(row.classesMissed)
         });
 
         setMissed(a)
@@ -150,7 +150,7 @@ export default function DashBoard({ navigation }) {
                 {loading ? <CardSkeleton /> : <View style={styles.boxContainer} >
                     <View>
                         <Pressable style={styles.box}
-                            onPress={() => { navigate.navigate("Attendence") }}>
+                            onPress={() => { navigate.navigate("BunkManager") }}>
                             <Text style={{ fontSize: 23, fontFamily: "monospace" }}>{missed}</Text>
                             <Text style={{ width: 100, textAlign: "center", padding: 1 }}>Classes Missed</Text>
                         </Pressable>
@@ -169,21 +169,21 @@ export default function DashBoard({ navigation }) {
                     <View style={styles.periods}>
                         <View>{sch[days[currentDay]].length == 0 ?
                             <View style={styles.overBox}>
-                                <View>{(currentDay == 0 || currentDay == 6) ? <Text style={styles.classOverText}>Yeah Dude, Today is not a working day. Chill...</Text> : <Text style={styles.classOverText}>Hurrah !  Classes are over for today</Text>}</View>
+                                <View>{(currentDay == 0 || currentDay == 6) ? <Text style={styles.classOverText}>Oops, Today is not a working a day 🙌</Text> : <Text style={styles.classOverText}>Hurrah !  Classes are over for today 🙌</Text>}</View>
                                 <View>
                                     <View
                                         style={{ display: "flex", justifyContent: "center", alignItems: "center", margin: 0 }}><Text style={{ fontWeight: 900, fontSize: 17 }}>Suggested Activities</Text></View>
                                     <View style={styles.actBox}>
-                                        <TouchableOpacity style={styles.btnBoxes} onPress={() => navigate.navigate("AttendenceDisplay")}>
+                                        <TouchableOpacity style={styles.btnBoxes} onPress={() => navigate.navigate("BunkManager")}>
                                             <View style={styles.pressBox}>
                                                 <FontAwesome name="hand-stop-o" size={34} color="black" />
-                                                <Text style={styles.boxText}>Check Attendance</Text>
+                                                <Text style={styles.boxText}>Bunk Manager</Text>
                                             </View>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={styles.btnBoxes}>
+                                        <TouchableOpacity style={styles.btnBoxes} onPress={() => navigate.navigate("Profile")}>
                                             <View style={styles.pressBox}>
-                                                <Ionicons name='timer-sharp' size={34} color="black" />
-                                                <Text style={styles.boxText}>Today's Routine</Text>
+                                                <Ionicons name="person" size={40} />
+                                                <Text style={styles.boxText}>Profile</Text>
                                             </View>
                                         </TouchableOpacity>
                                     </View>

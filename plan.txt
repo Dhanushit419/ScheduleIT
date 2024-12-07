@@ -17,3 +17,8 @@
          - About Us
          - CGPA: Display 8 semester GPAs, calculate GPA, store with corresponding semester number in local storage
          - Reset: Delete all local storage data
+
+
+//commmand for build
+
+eas build -p android --profile preview 

@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Register from './Pages/Register';
 import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/Profile';
 import CGPA from './Pages/Cgpa';
+import Courses from './Pages/Courses';
+import AddCourse from './Pages/AddCourse';
+import BunkManager from './Pages/BunkManager';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -14,8 +18,21 @@ const Tab = createBottomTabNavigator();
 function MainTabs() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Dashboard" component={Dashboard} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Dashboard" component={Dashboard}
+        options={{
+          tabBarLabel: "Dashboard",
+          tabBarIcon: () => (<Ionicons name="analytics" size={20} />),
+          headerShown: true,
+          headerTitle: "Dashboard"
+        }}
+      />
+      <Tab.Screen name="Profile" component={Profile}
+        options={{
+          tabBarLabel: "Profile",
+          tabBarIcon: () => (<Ionicons name="person" size={20} />),
+          headerShown: true,
+          headerTitle: "Profile"
+        }} />
     </Tab.Navigator>
   );
 }
@@ -43,6 +60,10 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Cgpa" component={CGPA} />
+        <Stack.Screen name="Courses" component={Courses} />
+        <Stack.Screen name="AddCourses" component={AddCourse} />
+        <Stack.Screen name="BunkManager" component={BunkManager} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

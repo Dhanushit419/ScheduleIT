@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "ScheduleIt",
+    "name": "ScheduleIT",
     "slug": "ScheduleIt",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/iconcopy.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/icon.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#f5f5f5"
     },
     "ios": {
       "supportsTablet": true

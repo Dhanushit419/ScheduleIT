@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MaterialIcons, Feather, FontAwesome, Entypo, } from '@expo/vector-icons';
@@ -38,17 +38,59 @@ const Profile = () => {
         }
     }, [])
 
-
     const logout = async () => {
         console.log("Logout process")
         try {
             await AsyncStorage.removeItem('student')
-            //await AsyncStorage.clear();
             navigator.navigate("Register")
-
         } catch (err) {
             console.log("ERROR: error in logging out", err.message)
         }
+    }
+
+    const confirmLogout = () => {
+        Alert.alert(
+            "Confirm Logout",
+            "Are you sure you want to logout?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: logout
+                }
+            ]
+        );
+    }
+
+    const reset = async () => {
+        console.log("Reset process")
+        try {
+            await AsyncStorage.clear();
+            console.log("Cleared")
+            logout()
+        } catch (err) {
+            console.log("ERROR: error in resetting", err.message)
+        }
+    }
+
+    const confirmReset = () => {
+        Alert.alert(
+            "Confirm Reset",
+            "All Course & Bunk Datas will be deleted. Are you sure you want to reset?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: reset
+                }
+            ]
+        );
     }
 
     return (
@@ -62,19 +104,11 @@ const Profile = () => {
                         <Text style={styles.name}>{userDetails.name_n}</Text>
                         <Text style={styles.dept}>B.Tech {userDetails.dept_n == "IT" ? "Information Technology" : userDetails.dept_n}</Text>
                     </View>
-                    {/* <View style={{
-                        position: "absolute",
-                        top: 15,
-                        left: 15
-                    }}>
-                        <Tooltip backgroundColor="lightgrey" withOverlay={false} popover={<Text style={{ textTransform: "capitalize" }}>{colorCodes[userDetails.sem_n] + " tag"}</Text>}>
-                            <Entypo name="awareness-ribbon" size={34} color={colorCodes[userDetails.sem_n]} /></Tooltip></View> */}
-
                     <Feather name="edit" size={24} color="black" style={{ position: "absolute", right: 15, top: 15 }} />
                 </View>
             </View>
             <View style={styles.midContainer}>
-                <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("CourseDisplay")}>
+                <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("Courses")}>
                     <View style={styles.pressBox} >
                         <MaterialCommunityIcons name="bookshelf" size={34} color="black" />
                         <Text style={styles.boxText}>My Courses</Text>
@@ -92,25 +126,19 @@ const Profile = () => {
                         <Text style={styles.boxText}>CGPA Manager</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("Attendence")}>
+                <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("BunkManager")}>
                     <View style={styles.pressBox}>
                         <FontAwesome name="hand-stop-o" size={34} color="black" />
                         <Text style={styles.boxText}>Bunk Manager</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnBoxes} onPress={async () => {
-                    //clear async storage
-                    await AsyncStorage.clear();
-                    console.log("Cleared")
-                    logout()
-                }}>
+                <TouchableOpacity style={styles.btnBoxes} onPress={confirmReset}>
                     <View style={styles.pressBox} >
                         <MaterialCommunityIcons name="rotate-3d-variant" size={34} color="red" />
-                        {/* <CachedIcon style={{ color: 'red', fontSize: 34 }} /> */}
                         <Text style={styles.boxText}>Reset</Text>
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.btnBoxes} onPress={logout}>
+                <TouchableOpacity style={styles.btnBoxes} onPress={confirmLogout}>
                     <View style={styles.pressBox}>
                         <MaterialIcons name="logout" size={34} color="red" />
                         <Text style={styles.boxText}>Logout</Text>
@@ -153,8 +181,6 @@ const styles = {
         backgroundColor: "#F2EFE5",
         borderRadius: 20,
         elevation: 10,
-        // borderWidth : 2,
-        // borderColor : "silver"
     },
     btnBoxes: {
         display: "flex",

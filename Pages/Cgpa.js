@@ -174,7 +174,7 @@ const Cgpa = () => {
                 <ScrollView contentContainerStyle={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>
-                            Semester {selectedSem + 1}
+                            Semester {selectedSem + 1} - (Enter No of Courses for Each Credit )
                         </Text>
 
                         {/* Credit Inputs */}
@@ -201,6 +201,7 @@ const Cgpa = () => {
 
                         {/* Grade Inputs */}
                         {grades.map((grade, idx) => (
+
                             <View style={styles.inputRow} key={grade.id}>
                                 <Text>Course {idx + 1} (Credit: {grade.credit}):</Text>
                                 <Picker
