@@ -25,7 +25,7 @@ export default function DashBoard({ navigation }) {
     var name, dept, sem, roll;
     const [userDetails, setUserDetails] = useState({ name_n: "", dept_n: "" });
     const [userLoading, setUserLoading] = useState(true);
-    const [currentDay, setCurrentDay] = useState(0);
+    const [currentDay, setCurrentDay] = useState(currentTime.getDay());
     const [currentHour, setCurrentHour] = useState(3);
     const [loading, setLoading] = useState(true)
     const [sch, setSch] = useState({
@@ -63,10 +63,12 @@ export default function DashBoard({ navigation }) {
             getMiss()
         }, [])
     );
-
     useEffect(() => {
         setCurrentDay(currentTime.getDay())
         console.log("Current day:" + currentTime.getDay())
+    }, [])
+    useEffect(() => {
+
         async function fetch() {
             try {
                 const studentData = await AsyncStorage.getItem("student");
@@ -80,7 +82,7 @@ export default function DashBoard({ navigation }) {
                     return {
                         name_n: name,
                         dept_n: dept,
-                        year_n: sem,
+                        sem_n: sem,
                         roll_n: roll
                     }
                 })
@@ -102,10 +104,11 @@ export default function DashBoard({ navigation }) {
 
                     const updatedSchedule = {};
                     const day = days[currentDay];
+                    console.log("Current day: ", currentDay);
                     if (parsedSchedule[currentDay]) {
                         updatedSchedule[day] = parsedSchedule[currentDay];
                         console.log(updatedSchedule)
-                        updatedSchedule[day] = parsedSchedule[currentDay].slice(3 - 1);
+                        updatedSchedule[day] = parsedSchedule[currentDay].slice(currentHour - 1);
                         console.log(updatedSchedule)
                     } else {
                         console.log("No schedule found for today");

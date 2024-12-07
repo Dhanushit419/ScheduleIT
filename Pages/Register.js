@@ -19,9 +19,8 @@ const Register = () => {
             const storedSchedule = await AsyncStorage.getItem('schedule');
             if (storedUser && storedSchedule) {
                 console.log(storedSchedule)
-                navigation.replace('Dashboard');
+                navigation.replace('MainTabs');
             }
-
         };
         checkUser();
     }, []);
@@ -50,8 +49,10 @@ const Register = () => {
                 Alert.alert("Success", "Registration successful!");
                 const schedule = Array.from({ length: 7 }, () => Array(8).fill(-1));
                 await AsyncStorage.setItem('schedule', JSON.stringify(schedule));
-
-                navigation.replace('Dashboard');
+                //make a array for cgpa with 8 sems as 0
+                const cgpa = Array(8).fill(0);
+                await AsyncStorage.setItem('cgpa', JSON.stringify(cgpa));
+                navigation.replace('MainTabs');
             } catch (error) {
                 Alert.alert("Error", "Failed to save data.");
                 console.error(error);
