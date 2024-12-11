@@ -1,15 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Modal, Pressable, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { BackHandler } from 'react-native';
 
 export default function App() {
-    const navigator = useNavigation()
+    const navigator = useNavigation();
     const [courseName, setCourseName] = useState('');
     const [faculty, setFaculty] = useState('');
+    const [location, setLocation] = useState('');
     const [credit, setCredit] = useState(null);
     const [credits, setCredits] = useState([
         { label: '1', value: 1 },
@@ -25,39 +25,99 @@ export default function App() {
     const [error, setError] = useState({});
     const [openCredit, setOpenCredit] = useState(false);
     const [openType, setOpenType] = useState(false);
+    const [schedule, setSchedule] = useState([]);
+    const [selectedHours, setSelectedHours] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    useEffect(() => {
+        const fetchSchedule = async () => {
+            const savedSchedule = JSON.parse(await AsyncStorage.getItem('schedule')) || Array(5).fill(Array(8).fill(-1));
+            setSchedule(savedSchedule);
+        };
+        fetchSchedule();
+    }, []);
 
     const validateForm = () => {
         const err = {};
         if (!courseName) err.courseName = 'Course Name is required.';
         if (!faculty) err.faculty = 'Faculty Name is required.';
+        if (!location) err.location = 'Location is required.';
         if (!credit) err.credit = 'Credit is required.';
         if (!type) err.type = 'Type is required.';
         setError(err);
         return Object.keys(err).length === 0;
     };
 
+    const handleHourSelect = (day, hour) => {
+        const index = selectedHours.findIndex(([d, h]) => d === day && h === hour);
+        if (index >= 0) {
+            setSelectedHours(selectedHours.filter(([d, h]) => !(d === day && h === hour)));
+        } else if (selectedHours.length < credit) {
+            setSelectedHours([...selectedHours, [day, hour]]);
+        }
+    };
+
     const handleSubmit = async () => {
         if (validateForm()) {
-            console.log('Form Validated. Submitting...');
+            if (selectedHours.length !== credit) {
+                alert(`Please select exactly ${credit} hours.`);
+                return;
+            }
             try {
                 const classData = JSON.parse(await AsyncStorage.getItem('classData')) || [];
-                classData.push({ courseName, faculty, credit, type, classesMissed: 0 });
+                const CourseNo = classData.length + 1;
+                classData.push({ CourseNo, courseName, faculty, location, credit, type, classesMissed: 0 });
                 await AsyncStorage.setItem('classData', JSON.stringify(classData));
-                console.log('Course Added Successfully:');
+
+                const updatedSchedule = schedule.map((day, dayIdx) =>
+                    day.map((hour, hourIdx) =>
+                        selectedHours.some(([d, h]) => d === dayIdx && h === hourIdx)
+                            ? CourseNo
+                            : hour
+                    )
+                );
+                await AsyncStorage.setItem('schedule', JSON.stringify(updatedSchedule));
                 navigator.navigate('Courses');
             } catch (err) {
                 console.log('Error Adding Course:', err.message);
             }
-        } else {
-            console.log('Validation Failed.');
         }
     };
+
+    const renderGrid = () => (
+        <View>
+            {schedule.slice(1, -1).map((day, dayIdx) => (
+                <View key={dayIdx + 1} style={styles.row}>
+                    <Text style={styles.dayLabel}>{['Mon', 'Tue', 'Wed', 'Thu', 'Fri'][dayIdx]}</Text>
+                    {day.map((hour, hourIdx) => {
+                        const isSelected = selectedHours.some(([d, h]) => d === dayIdx + 1 && h === hourIdx);
+                        const isBlocked = hour !== -1;
+                        return (
+                            <Pressable
+                                key={hourIdx}
+                                onPress={() => !isBlocked && handleHourSelect(dayIdx + 1, hourIdx)}
+                                style={[
+                                    styles.cell,
+                                    isBlocked
+                                        ? styles.blocked
+                                        : isSelected
+                                            ? styles.selected
+                                            : styles.available,
+                                ]}
+                            >
+                                <Text style={styles.cellText}>{hourIdx + 1}</Text>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+            ))}
+        </View>
+    );
 
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Add a Course</Text>
             <View style={styles.form}>
-                {/* Course Name Input */}
                 <Text style={styles.text}>Course Name</Text>
                 <TextInput
                     style={styles.input}
@@ -66,32 +126,6 @@ export default function App() {
                     onChangeText={setCourseName}
                 />
                 {error.courseName && <Text style={styles.err}>{error.courseName}</Text>}
-
-                {/* Faculty Name Input */}
-                <Text style={styles.text}>Faculty Name</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter Faculty Name"
-                    value={faculty}
-                    onChangeText={setFaculty}
-                />
-                {error.faculty && <Text style={styles.err}>{error.faculty}</Text>}
-
-                {/* Credit Dropdown */}
-                <Text style={styles.text}>Credits</Text>
-                <DropDownPicker
-                    open={openCredit}
-                    value={credit}
-                    items={credits}
-                    setOpen={setOpenCredit}
-                    setValue={setCredit}
-                    setItems={setCredits}
-                    placeholder="Select Credit"
-                    style={styles.input}
-                />
-                {error.credit && <Text style={styles.err}>{error.credit}</Text>}
-
-                {/* Type Dropdown */}
                 <Text style={styles.text}>Type</Text>
                 <DropDownPicker
                     open={openType}
@@ -102,50 +136,203 @@ export default function App() {
                     setItems={setTypes}
                     placeholder="Select Type"
                     style={styles.input}
+                    dropDownContainerStyle={[styles.dropDown, { zIndex: 1000 }]}
                 />
                 {error.type && <Text style={styles.err}>{error.type}</Text>}
 
-                {/* Submit Button */}
-                <Button title="Add Course" onPress={handleSubmit} />
+                <Text style={styles.text}>Faculty Name</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Faculty Name"
+                    value={faculty}
+                    onChangeText={setFaculty}
+                />
+                {error.faculty && <Text style={styles.err}>{error.faculty}</Text>}
+
+                <Text style={styles.text}>Location</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Location"
+                    value={location}
+                    onChangeText={setLocation}
+                />
+                {error.location && <Text style={styles.err}>{error.location}</Text>}
+
+                <Text style={styles.text}>Credits</Text>
+                <DropDownPicker
+                    open={openCredit}
+                    value={credit}
+                    items={credits}
+                    setOpen={setOpenCredit}
+                    setValue={setCredit}
+                    setItems={setCredits}
+                    placeholder="Select Credit"
+                    style={styles.input}
+                    dropDownContainerStyle={[styles.dropDown, { zIndex: 2000 }]}
+                />
+                {error.credit && <Text style={styles.err}>{error.credit}</Text>}
+
+                <Button
+                    title="Select Hours"
+                    onPress={() => setModalVisible(true)}
+                    disabled={!credit}
+                />
+                <Button
+                    title="Add Course"
+                    onPress={handleSubmit}
+                    disabled={selectedHours.length !== credit}
+                />
             </View>
+
+            <Modal
+                visible={modalVisible}
+                animationType="fade"
+                transparent={true} // Transparent background for the modal
+                onRequestClose={() => setModalVisible(false)} // Close the modal when back button is pressed
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalHeader}>Select {credit} Hours</Text>
+                        <ScrollView>{renderGrid()}</ScrollView>
+                        <View style={styles.modalButtons}>
+                            <Pressable style={styles.applyButton} onPress={() => setModalVisible(false)}>
+                                <Text style={styles.buttonText}>APPLY</Text>
+                            </Pressable>
+
+                        </View>
+                    </View>
+                </View>
+
+            </Modal >
+
             <StatusBar style="auto" />
-        </View>
+        </View >
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#164863',
+        backgroundColor: '#123456',
+    },
+    dayLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        alignContent: 'center',
+        //justifyContent: 'center',
+        // alignItems: 'center',
+        textAlign: 'left',
+
+        width: 40
     },
     header: {
-        fontSize: 25,
+        fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: 'white',
+        color: '#FFF',
     },
     form: {
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f9fa',
         padding: 20,
-        borderRadius: 10,
-        width: '80%',
-        elevation: 5,
+        borderRadius: 15,
+        width: '85%',
+        elevation: 8,
     },
     text: {
-        fontSize: 16,
-        marginBottom: 5,
+        fontSize: 18,
+        marginBottom: 8,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
-        padding: 10,
+        borderColor: '#6c757d',
+        padding: 12,
         marginBottom: 15,
-        borderRadius: 5,
+        borderRadius: 8,
+    },
+    dropDown: {
+        borderColor: '#6c757d',
     },
     err: {
-        color: 'red',
+        color: '#dc3545',
         marginBottom: 10,
+        fontSize: 14,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    cell: {
+        width: 25,
+        height: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 3,
+        borderRadius: 5,
+        borderWidth: 1,
+    },
+    cellText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    blocked: {
+        backgroundColor: '#b0b0b0',
+        borderColor: '#b0b0b0',
+    },
+    available: {
+        backgroundColor: '#f0f0f0',
+        borderColor: '#ccc',
+    },
+    selected: {
+        backgroundColor: '#007bff',
+        borderColor: '#0056b3',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '85%',
+        backgroundColor: '#F2EFE5',
+        padding: 20,
+        borderRadius: 15,
+        elevation: 8,
+        alignItems: 'center',
+    },
+    modalHeader: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 15,
+        color: '#333',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 20,
+        width: '100%',
+    },
+    applyButton: {
+        backgroundColor: '#2196F3',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginRight: 10,
+    },
+    closeButton: {
+        backgroundColor: '#dc3545',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
 });

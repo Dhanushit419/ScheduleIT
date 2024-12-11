@@ -47,11 +47,17 @@ const Register = () => {
             try {
                 await AsyncStorage.setItem('student', JSON.stringify(userDetails));
                 Alert.alert("Success", "Registration successful!");
-                const schedule = Array.from({ length: 7 }, () => Array(8).fill(-1));
-                await AsyncStorage.setItem('schedule', JSON.stringify(schedule));
-                //make a array for cgpa with 8 sems as 0
-                const cgpa = Array(8).fill(0);
-                await AsyncStorage.setItem('cgpa', JSON.stringify(cgpa));
+                const storedSchedule = await AsyncStorage.getItem('schedule');
+                if (!storedSchedule) {
+                    const schedule = Array.from({ length: 7 }, () => Array(8).fill(-1));
+                    await AsyncStorage.setItem('schedule', JSON.stringify(schedule));
+                }
+
+                const storedCgpa = await AsyncStorage.getItem('cgpa');
+                if (!storedCgpa) {
+                    const cgpa = Array(8).fill(0);
+                    await AsyncStorage.setItem('cgpa', JSON.stringify(cgpa));
+                }
                 navigation.replace('MainTabs');
             } catch (error) {
                 Alert.alert("Error", "Failed to save data.");

@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, ScrollView, FlatList, TouchableOpacity, Pressable } from "react-native"
 import React, { useState, useEffect } from "react";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -28,6 +28,7 @@ export default function DashBoard({ navigation }) {
     const [currentDay, setCurrentDay] = useState(currentTime.getDay());
     const [currentHour, setCurrentHour] = useState(3);
     const [loading, setLoading] = useState(true)
+    const [start, setStart] = useState(false)
     const [sch, setSch] = useState({
         sunday: [],
         monday: [],
@@ -96,21 +97,32 @@ export default function DashBoard({ navigation }) {
         async function fetchScheduleFromLocalStorage() {
             try {
                 const scheduleData = await AsyncStorage.getItem("schedule");
-                if (scheduleData) {
+                const classData = await AsyncStorage.getItem("classData");
+                if (classData == null) setStart(true)
+                if (scheduleData && classData) {
                     const parsedSchedule = JSON.parse(scheduleData);
+                    const parsedClassData = JSON.parse(classData);
                     var currentHour = timeToHour(currentTime.getHours(), currentTime.getMinutes()) || 1;
                     console.log("Current hour : ", currentHour);
                     setCurrentHour(currentHour);
-
                     const updatedSchedule = {};
                     const day = days[currentDay];
                     console.log("Current day: ", currentDay);
                     if (parsedSchedule[currentDay]) {
-                        updatedSchedule[day] = parsedSchedule[currentDay];
-                        console.log(updatedSchedule)
-                        updatedSchedule[day] = parsedSchedule[currentDay].slice(currentHour - 1);
-                        console.log(updatedSchedule)
+                        updatedSchedule[day] = parsedSchedule[currentDay].map((courseNum, idx) => {
+                            if (courseNum !== -1) {
+                                const courseDetails = parsedClassData.find(course => course.CourseNo === courseNum);
+                                return {
+                                    ...courseDetails,
+                                    hour: idx + 1
+                                };
+                            }
+                            return null;
+                        }).filter(item => item !== null);
+                        updatedSchedule[day] = updatedSchedule[day].filter(item => item.hour >= currentHour);
+                        console.log(updatedSchedule);
                     } else {
+                        updatedSchedule[day] = [];
                         console.log("No schedule found for today");
                     }
                     setSch(updatedSchedule);
@@ -147,25 +159,73 @@ export default function DashBoard({ navigation }) {
                     }}>{userDetails.name_n} </Text><Text>{userDetails.dept_n == "IT" ? "B.Tech " : "B.E "} {userDetails.dept_n}</Text></Text>
                 </View>}
                 {/* second view for 3 boxes */}
-                {loading ? <CardSkeleton /> : <View style={styles.boxContainer} >
-                    <View>
-                        <Pressable style={styles.box}
-                            onPress={() => { navigate.navigate("BunkManager") }}>
-                            <Text style={{ fontSize: 23, fontFamily: "monospace" }}>{missed}</Text>
-                            <Text style={{ width: 100, textAlign: "center", padding: 1 }}>Classes Missed</Text>
-                        </Pressable>
-                    </View>
-                    <View style={styles.box2}>
-                        <Text style={styles.time}>{formattedTime}</Text>
-                    </View>
-                </View>}
+                {start ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#2C3E50', textAlign: 'center', marginBottom: 10 }}>
+                        🎉ScheduleIT! 🎉
+                    </Text>
+
+                    <Text style={{ fontSize: 16, color: '#7F8C8D', textAlign: 'center', lineHeight: 24 }}>
+                        You're just one step away from organizing your schedule and acing your tasks! 💪
+                    </Text>
+
+
+                </View>
+                    :
+                    loading ? <CardSkeleton /> : <View style={styles.boxContainer} >
+                        <View>
+                            <Pressable style={styles.box}
+                                onPress={() => { navigate.navigate("BunkManager") }}>
+                                <Text style={{ fontSize: 23, fontFamily: "monospace" }}>{missed}</Text>
+                                <Text style={{ width: 100, textAlign: "center", padding: 1 }}>Classes Missed</Text>
+                            </Pressable>
+                        </View>
+                        <View style={styles.box2}>
+                            <Text style={styles.time}>{formattedTime}</Text>
+                        </View>
+                    </View>}
             </View>
             <View style={styles.bottom}>
-                {loading ? <CardSkeleton /> : <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 15, alignItems: "center" }}>
+                {start ? <></> : loading ? <CardSkeleton /> : <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 15, alignItems: "center" }}>
                     <Text style={{ fontSize: 20, fontFamily: "monospace" }}>Upcoming classes</Text>
                     <Pressable onPress={() => { navigate.navigate("Schedule") }}><Ionicons name="calendar" size={22}></Ionicons></Pressable>
                 </View>}
-                {loading || !sch ? <CardSkeleton /> :
+                {start ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: '#f8f8f8' }}>
+                    {/* Welcome Message */}
+                    <Text style={{ fontSize: 24, fontWeight: '600', color: '#2C3E50', textAlign: 'center', marginBottom: 15 }}>
+                        You're just registered!
+                    </Text>
+
+                    {/* Instructional Text */}
+                    <Text style={{ fontSize: 18, color: '#7F8C8D', textAlign: 'center', marginBottom: 40, lineHeight: 24, fontFamily: 'Arial' }}>
+                        Please add a course to continue and start your journey in
+                        <Text style={{ fontStyle: 'italic', color: '#7F8C8D' }}> ScheduleIT</Text>
+                    </Text>
+
+                    {/* Stylish Card-like Button */}
+                    <TouchableOpacity
+                        onPress={() => navigate.navigate("AddCourses")}
+                        style={{
+                            width: '80%',
+                            maxWidth: 350,
+                            backgroundColor: '#F2EFE5', // Solid blue background
+                            borderRadius: 15,
+                            paddingVertical: 18,
+                            paddingHorizontal: 40,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            elevation: 5,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 10 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 10,
+                            marginBottom: 20,
+                        }}
+                    >
+
+                        <MaterialCommunityIcons name="book-alert-outline" size={50} color="black" />
+                        <Text style={{ fontSize: 18, color: 'black', marginTop: 10 }}>Add a Course</Text>
+                    </TouchableOpacity>
+                </View> : loading || !sch ? <CardSkeleton /> :
                     <View style={styles.periods}>
                         <View>{sch[days[currentDay]].length == 0 ?
                             <View style={styles.overBox}>
@@ -204,7 +264,7 @@ export default function DashBoard({ navigation }) {
                                                     <Text style={{ fontSize: 20 }}>{item.courseName}</Text>
                                                 </View>
                                                 <View style={styles.rowBottom}>
-                                                    <View style={{ justifyContent: "flex-start" }}><Text><Ionicons name="person" size={15} color="black" /> {item.staff}</Text></View>
+                                                    <View style={{ justifyContent: "flex-start" }}><Text><Ionicons name="person" size={15} color="black" /> {item.faculty}</Text></View>
                                                     <Text>  <Ionicons name="location" size={15} color="black" /> {item.location ? item.location : "Location not given"}</Text>
                                                 </View>
                                             </View>
