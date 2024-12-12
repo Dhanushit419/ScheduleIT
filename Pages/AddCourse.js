@@ -58,6 +58,7 @@ export default function App() {
     };
 
     const handleSubmit = async () => {
+
         if (validateForm()) {
             if (selectedHours.length !== credit) {
                 alert(`Please select exactly ${credit} hours.`);
@@ -158,7 +159,7 @@ export default function App() {
                 />
                 {error.location && <Text style={styles.err}>{error.location}</Text>}
 
-                <Text style={styles.text}>Credits</Text>
+                <Text style={styles.text}>Hours</Text>
                 <DropDownPicker
                     open={openCredit}
                     value={credit}
@@ -166,7 +167,7 @@ export default function App() {
                     setOpen={setOpenCredit}
                     setValue={setCredit}
                     setItems={setCredits}
-                    placeholder="Select Credit"
+                    placeholder="Select Hours"
                     style={styles.input}
                     dropDownContainerStyle={[styles.dropDown, { zIndex: 2000 }]}
                 />

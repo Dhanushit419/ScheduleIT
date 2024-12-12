@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, Image, Modal, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MaterialIcons, Feather, FontAwesome, Entypo, } from '@expo/vector-icons';
@@ -92,6 +92,26 @@ const Profile = () => {
             ]
         );
     }
+    const [editDialogVisible, setEditDialogVisible] = useState(false);
+    const [newName, setNewName] = useState("");
+
+    const handleSaveName = async () => {
+        try {
+            const student = JSON.parse(await AsyncStorage.getItem("student"));
+            if (student) {
+                student.name = newName;
+                await AsyncStorage.setItem("student", JSON.stringify(student));
+                setUserDetails((prev) => ({
+                    ...prev,
+                    name_n: newName
+                }));
+            }
+            setEditDialogVisible(false);
+            //navigator.navigate("Dashboard");
+        } catch (err) {
+            console.log("ERROR: error in saving name", err.message);
+        }
+    };
 
     return (
         <View>
@@ -104,8 +124,115 @@ const Profile = () => {
                         <Text style={styles.name}>{userDetails.name_n}</Text>
                         <Text style={styles.dept}>B.Tech {userDetails.dept_n == "IT" ? "Information Technology" : userDetails.dept_n}</Text>
                     </View>
-                    <Feather name="edit" size={24} color="black" style={{ position: "absolute", right: 15, top: 15 }} />
+                    <TouchableOpacity style={{ position: "absolute", right: 15, top: 15 }} onPress={() => setEditDialogVisible(true)}>
+                        <Feather name="edit" size={24} color="black" />
+                    </TouchableOpacity>
                 </View>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={editDialogVisible}
+                    onRequestClose={() => setEditDialogVisible(false)}
+                >
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+                        }}
+                    >
+                        <View
+                            style={{
+                                margin: 20,
+                                backgroundColor: "white",
+                                borderRadius: 15,
+                                padding: 30,
+                                alignItems: "center",
+                                shadowColor: "#000",
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 4,
+                                elevation: 5,
+                                width: 300,
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    marginBottom: 20,
+                                    textAlign: "center",
+                                    fontSize: 20,
+                                    fontWeight: "bold",
+                                    color: "#333",
+                                }}
+                            >
+                                Edit Name
+                            </Text>
+                            <TextInput
+                                style={{
+                                    height: 40,
+                                    borderColor: "#ccc",
+                                    borderWidth: 1,
+                                    borderRadius: 5,
+                                    marginBottom: 20,
+                                    width: "100%",
+                                    paddingLeft: 10,
+                                    backgroundColor: "#f9f9f9",
+                                }}
+                                value={newName}
+                                onChangeText={setNewName}
+                                placeholder="Enter new name"
+                            />
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "space-around",
+                                    width: "100%",
+                                }}
+                            >
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: "#2196F3",
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 20,
+                                        borderRadius: 5,
+                                    }}
+                                    onPress={() => setEditDialogVisible(false)}
+                                >
+                                    <Text
+                                        style={{
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: "#2196F3",
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 20,
+                                        borderRadius: 5,
+                                    }}
+                                    onPress={handleSaveName}
+                                >
+                                    <Text
+                                        style={{
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            textAlign: "center",
+                                        }}
+                                    >
+                                        Save
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
             </View>
             <View style={styles.midContainer}>
                 <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("Courses")}>

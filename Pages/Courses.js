@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,24 +9,9 @@ import { BackHandler } from 'react-native';
 const CoursesDisplay = () => {
     const navigate = useNavigation();
 
-    const theoryCourse = [
-        { name: "Internet of Things", faculty: "Selvi Ravindran" },
-        { name: "Distributed Systems", faculty: "Swaminathan" },
-        { name: "Internet of Things", faculty: "Selvi Ravindran" },
-        { name: "Distributed Systems", faculty: "Swaminathan" },
-        { name: "Internet of Things", faculty: "Selvi Ravindran" }, { name: "Internet of Things", faculty: "Selvi Ravindran" },
-        { name: "Distributed Systems", faculty: "Swaminathan" },
-        { name: "Internet of Things", faculty: "Selvi Ravindran" },
-    ]
-
-    const labCourse = [
-        { name: "Data Analytics Laboratory", faculty: "Bama" },
-        { name: "IoT Laboratory", faculty: "Selvi Ravindran" },
-        { name: "Socially relavant Project laboratory", faculty: "Jasmine" },
-    ]
-    const [theoryCourses, settheoryCourses] = useState(theoryCourse)
-    const [labCourses, setlabCourses] = useState(labCourse)
-
+    const [theoryCourses, settheoryCourses] = useState([])
+    const [labCourses, setlabCourses] = useState([])
+    const [loading, setLoading] = useState(true);
     const GetCourses = async () => {
         console.log("get courses")
         try {
@@ -38,6 +23,7 @@ const CoursesDisplay = () => {
                 const labCourses = parsedData.filter((course) => course.type === "Lab");
                 settheoryCourses(theoryCourses);
                 setlabCourses(labCourses);
+                setLoading(false);
             }
         } catch (err) {
             console.log("Error in fetching courses", err.message);
@@ -68,12 +54,15 @@ const CoursesDisplay = () => {
         <ScrollView style={styles.container}>
             <View style={styles.section}>
                 <View style={styles.sectionHead} >
-                    <Text style={styles.headText}>Theories Courses</Text>
+                    <Text style={styles.headText}>Theory Courses</Text>
                 </View>
                 <View style={styles.sectionBody}>
-                    {
+                    {loading ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color="#0000ff" />
+                        <Text>Loading...</Text>
+                    </View> :
                         theoryCourses.map((course, ind) => {
-                            return <View style={styles.courseBox} id={ind + ""}>
+                            return <View style={styles.courseBox} key={ind}>
                                 <Text style={styles.courseText}>{course.courseName}</Text>
                                 <Text style={styles.facultyText}>{course.faculty}</Text>
                             </View>
@@ -86,9 +75,12 @@ const CoursesDisplay = () => {
                     <Text style={styles.headText} >Laboratory Courses</Text>
                 </View>
                 <View style={styles.sectionBody}>
-                    {
+                    {loading ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <ActivityIndicator size="large" color="#0000ff" />
+                        <Text>Loading...</Text>
+                    </View> :
                         labCourses.map((course, ind) => {
-                            return <View style={styles.courseBox} id={(100 + ind) + ""}>
+                            return <View style={styles.courseBox} key={100 + ind}>
                                 <Text style={styles.courseText}>{course.courseName}</Text>
                                 <Text style={styles.facultyText}>{course.faculty}</Text>
                             </View>
@@ -142,10 +134,10 @@ const styles = StyleSheet.create({
     },
     courseBox: {
         padding: 25,
-        backgroundColor: "#E5D4FF",
+        backgroundColor: "#F2EFE5",
         borderRadius: 15,
         flexBasis: "45%",
-        elevation: 5
+        elevation: 10
     },
     courseText: {
         fontSize: 17,

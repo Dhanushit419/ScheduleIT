@@ -62,6 +62,9 @@ export default function DashBoard({ navigation }) {
     useFocusEffect(
         React.useCallback(() => {
             getMiss()
+
+            fetch()
+
         }, [])
     );
     useEffect(() => {

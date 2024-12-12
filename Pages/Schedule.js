@@ -1,12 +1,11 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, useWindowDimensions, StyleSheet, FlatList, Text } from 'react-native';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 function PerDay({ Schedule }) {
-    if (Schedule.length === 0) {
+    if (!Schedule || Schedule.length === 0) {
         return (
             <View style={styles.noHoursContainer}>
                 <Text style={styles.noHoursText}>No hours today</Text>
@@ -17,28 +16,26 @@ function PerDay({ Schedule }) {
         <View>
             <FlatList
                 data={Schedule}
-                renderItem={({ item }) => {
-                    //console.log(item.Subject)
-                    return (
-                        <View style={styles.periodsRow}>
-                            <View style={styles.rowLeft}>
-                                <Text style={{ fontSize: 20 }}>{item.hour}</Text>
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.periodsRow}>
+                        <View style={styles.rowLeft}>
+                            <Text style={{ fontSize: 20 }}>{item.hour}</Text>
+                        </View>
+                        <View style={styles.rowRight}>
+                            <View style={styles.rowTop}>
+                                <Text style={{ fontSize: 20 }}>{item.courseName}</Text>
                             </View>
-                            <View style={styles.rowRight}>
-                                <View style={styles.rowTop}>
-                                    <Text style={{ fontSize: 20 }}>{item.courseName}</Text>
-
-                                </View>
-                                <View style={styles.rowBottom}>
-                                    <View style={{ justifyContent: "flex-start" }}><Text>{item.staff}</Text></View>
-                                    <Text ><Ionicons name="location" size={15} color="black" /> {item.location ? item.location : "No Location given"}</Text>
-                                </View>
+                            <View style={styles.rowBottom}>
+                                <View style={{ justifyContent: "flex-start" }}><Text>{item.staff}</Text></View>
+                                <Text><Ionicons name="location" size={15} color="black" /> {item.location}</Text>
                             </View>
                         </View>
-                    )
-                }}
+                    </View>
+                )}
             />
-        </View>)
+        </View>
+    );
 }
 
 const renderTabBar = props => (
@@ -47,51 +44,40 @@ const renderTabBar = props => (
         scrollEnabled={true}
         indicatorStyle={{ backgroundColor: 'black' }}
         renderLabel={({ route }) => (
-            <Text style={{ color: "black", margin: 8, fontWeight: "bold", fontSize: 17 }}>
+            <Text style={{ color: "blue", margin: 8, fontWeight: "bold", fontSize: 17 }}>
                 {route.title}
             </Text>
         )}
-        gap={1}
-        style={{ backgroundColor: '#B5C0D0', overflowX: "scroll" }}
+        style={{ backgroundColor: '#B5C0D0' }}
     />
 );
-
-
 
 export default function TabViewExample() {
     const layout = useWindowDimensions();
 
-    const [index, setIndex] = React.useState(0);
-    const [routes] = React.useState([
-        { key: 'first', title: 'Monday' },
-        { key: 'second', title: 'Tuesday' },
-        { key: 'third', title: 'Wednesday' },
-        { key: 'fourth', title: 'Thursday' },
-        { key: 'fifth', title: 'Friday' }
+    const [index, setIndex] = useState(0);
+    const [routes] = useState([
+        { key: 'monday', title: 'Monday' },
+        { key: 'tuesday', title: 'Tuesday' },
+        { key: 'wednesday', title: 'Wednesday' },
+        { key: 'thursday', title: 'Thursday' },
+        { key: 'friday', title: 'Friday' }
     ]);
 
-    const [sch, setSch] = React.useState({
+    const [schedule, setSchedule] = useState({
         monday: [],
         tuesday: [],
         wednesday: [],
         thursday: [],
         friday: []
-    })
-    const renderScene = SceneMap({
-        first: () => <PerDay Schedule={sch.monday} />,
-        second: () => <PerDay Schedule={sch.tuesday} />,
-        third: () => <PerDay Schedule={sch.wednesday} />,
-        fourth: () => <PerDay Schedule={sch.thursday} />,
-        fifth: () => <PerDay Schedule={sch.friday} />
     });
-    React.useEffect(() => {
+
+    useEffect(() => {
         async function fetchSchedule() {
             try {
-                // Fetch schedule and class data from AsyncStorage
-                const localSchedule = JSON.parse(await AsyncStorage.getItem("schedule"));
-                const classData = JSON.parse(await AsyncStorage.getItem("classData"));
+                const localSchedule = JSON.parse(await AsyncStorage.getItem("schedule")) || [];
+                const classData = JSON.parse(await AsyncStorage.getItem("classData")) || [];
 
-                // Initialize the mappedSchedule
                 const mappedSchedule = {
                     monday: [],
                     tuesday: [],
@@ -100,54 +86,56 @@ export default function TabViewExample() {
                     friday: []
                 };
 
-                // Array of weekdays for iterating
                 const days = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
-                // Check for the structure of the localSchedule and classData
-                console.log(localSchedule); // Check if the schedule is retrieved correctly
-                console.log(classData); // Check if the classData is retrieved correctly
-
-                // Loop through the days
                 days.forEach((day, dayIndex) => {
-                    console.log(day); // Log the day
-
-                    // Loop through the schedule hours for that day (assuming max 8 periods)
                     for (let hourIndex = 0; hourIndex < 8; hourIndex++) {
-                        const courseNum = localSchedule[dayIndex][hourIndex]; // Access schedule for the specific day and hour
+                        const courseNum = localSchedule[dayIndex]?.[hourIndex];
 
-                        // If there is a course number, find course details from classData
-                        if (courseNum !== -1) {
+                        if (courseNum !== undefined && courseNum !== -1) {
                             const courseDetails = classData.find(course => course.CourseNo === courseNum);
-
-                            if (courseDetails) { // If course details are found, add to mappedSchedule
+                            if (courseDetails) {
                                 mappedSchedule[day].push({
-                                    hour: hourIndex + 1, // +1 to match hour index
+                                    hour: hourIndex + 1,
                                     courseName: courseDetails.courseName,
                                     staff: courseDetails.faculty,
                                     location: courseDetails.location || "No Location"
                                 });
-                            } else {
-                                console.log(`Course with number ${courseNum} not found in classData.`);
                             }
                         }
                     }
                 });
 
-                // Set the state with the mapped schedule
-                setSch(mappedSchedule);
-
+                setSchedule(mappedSchedule);
             } catch (err) {
-                console.log("Error in getting weekly schedule: ", err.message);
+                console.error("Error fetching schedule: ", err);
             }
         }
 
         fetchSchedule();
-    }, [])
+    }, []);
+
+    const renderScene = ({ route }) => {
+        switch (route.key) {
+            case 'monday':
+                return <PerDay Schedule={schedule.monday} />;
+            case 'tuesday':
+                return <PerDay Schedule={schedule.tuesday} />;
+            case 'wednesday':
+                return <PerDay Schedule={schedule.wednesday} />;
+            case 'thursday':
+                return <PerDay Schedule={schedule.thursday} />;
+            case 'friday':
+                return <PerDay Schedule={schedule.friday} />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <TabView
             navigationState={{ index, routes }}
             renderTabBar={renderTabBar}
-            overScrollMode={"always"}
             renderScene={renderScene}
             onIndexChange={setIndex}
             initialLayout={{ width: layout.width }}
@@ -155,85 +143,21 @@ export default function TabViewExample() {
     );
 }
 
-
 const styles = StyleSheet.create({
-    main: {
-        flex: 1,
-        padding: 20,
-
-    },
-    top: {
-        flex: 2,
-    },
-    bottom: {
-        flex: 3,
-    },
-    welcome: {
-        flex: 1
-    },
-    nametext: {
-        justifyContent: "center",
-        marginLeft: 30
-    },
-    boxContainer: {
-        flex: 2,
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center"
-    },
-    box: {
-        height: 100,
-        width: 100,
-        elevation: 5,
-        backgroundColor: "#fff",
-        // borderWidth: 1,
-        //borderColor: "silver",
-        borderRadius: 10,
-        marginBottom: 5,
-        padding: 10,
-        justifyContent: "center",
-        alignItems: "center"
-
-    },
-    box2: {
-        //time box
-        flex: 2,
-        height: 120,
-        elevation: 5,
-        backgroundColor: "#fff",
-        // borderWidth: 1,
-        //borderColor: "silver",
-        borderRadius: 10,
-        marginBottom: 5,
-        marginLeft: 20,
-        padding: 10,
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    time: {
-        fontSize: 30,
-        fontFamily: "monospace",
-        marginBottom: 5
-    },
-    periods: {
-        flex: 1,
-        flexDirection: "column",
-        justifyContent: "space-around",
-        width: "100%",
-
-    },
     periodsRow: {
         backgroundColor: "white",
         padding: 10,
-        width: "100%",
+        width: "95%",
         marginBottom: 5,
         flexDirection: "row",
+        justifyContent: 'center',
+        alignSelf: 'center',
+        //alignItems: 'center',
         marginTop: 5,
         borderColor: "silver",
         borderWidth: 1,
         borderRadius: 10,
         elevation: 5
-
     },
     rowLeft: {
         flex: 1,
@@ -248,7 +172,6 @@ const styles = StyleSheet.create({
     },
     rowTop: {
         flex: 1,
-        //marginLeft: 30
         paddingLeft: 10
     },
     rowBottom: {
@@ -256,7 +179,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         padding: 10,
-        flexGrow: 1,
     },
     noHoursContainer: {
         flex: 1,
@@ -268,5 +190,4 @@ const styles = StyleSheet.create({
         color: "black",
         fontWeight: "bold",
     },
-
-})
+});
