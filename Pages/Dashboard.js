@@ -164,7 +164,7 @@ export default function DashBoard({ navigation }) {
                 {/* second view for 3 boxes */}
                 {start ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                     <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#2C3E50', textAlign: 'center', marginBottom: 10 }}>
-                        🎉ScheduleIT! 🎉
+                        💻 ScheduleIT! 📝
                     </Text>
 
                     <Text style={{ fontSize: 16, color: '#7F8C8D', textAlign: 'center', lineHeight: 24 }}>

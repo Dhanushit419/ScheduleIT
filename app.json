@@ -4,7 +4,7 @@
     "slug": "ScheduleIt",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/iconcopy.png",
+    "icon": "./assets/favicon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/icon2.jpg",
         "backgroundColor": "#ffffff"
       },
       "buildType": "apk",
