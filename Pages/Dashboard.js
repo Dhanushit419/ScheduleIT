@@ -52,96 +52,92 @@ export default function DashBoard({ navigation }) {
         const parsedData = JSON.parse(existingData);
         let a = 0
         parsedData.forEach((row) => {
-            console.log(row)
+            //console.log(row)
             a += parseInt(row.classesMissed)
         });
-
+        console.log("Missed classes: ", a)
         setMissed(a)
     }
-
-    useFocusEffect(
-        React.useCallback(() => {
-            getMiss()
-
-            fetch()
-
-        }, [])
-    );
+    async function fetch() {
+        try {
+            const studentData = await AsyncStorage.getItem("student");
+            const student = JSON.parse(studentData);
+            name = student.name;
+            dept = student.dept;
+            sem = student.sem;
+            roll = student.roll;
+            console.log(name, dept);
+            setUserDetails((prev) => {
+                return {
+                    name_n: name,
+                    dept_n: dept,
+                    sem_n: sem,
+                    roll_n: roll
+                }
+            })
+            console.log(userDetails)
+            console.log(userDetails)
+            setUserLoading(false);
+        } catch (err) {
+            console.log("Error in Dashboard.js Fetching User details from async storage : ", err.message)
+        }
+    }
+    async function fetchScheduleFromLocalStorage() {
+        try {
+            const scheduleData = await AsyncStorage.getItem("schedule");
+            const classData = await AsyncStorage.getItem("classData");
+            if (classData == null) setStart(true)
+            if (scheduleData && classData) {
+                const parsedSchedule = JSON.parse(scheduleData);
+                const parsedClassData = JSON.parse(classData);
+                var currentHour = timeToHour(currentTime.getHours(), currentTime.getMinutes()) || 1;
+                console.log(currentTime.getHours(), currentTime.getMinutes());
+                console.log("Current hour : ", currentHour);
+                setCurrentHour(currentHour);
+                const updatedSchedule = {};
+                const day = days[currentDay];
+                console.log("Current day: ", currentDay);
+                if (parsedSchedule[currentDay]) {
+                    updatedSchedule[day] = parsedSchedule[currentDay].map((courseNum, idx) => {
+                        if (courseNum !== -1) {
+                            const courseDetails = parsedClassData.find(course => course.CourseNo === courseNum);
+                            return {
+                                ...courseDetails,
+                                hour: idx + 1
+                            };
+                        }
+                        return null;
+                    }).filter(item => item !== null);
+                    updatedSchedule[day] = updatedSchedule[day].filter(item => item.hour >= currentHour);
+                    console.log(updatedSchedule);
+                } else {
+                    updatedSchedule[day] = [];
+                    console.log("No schedule found for today");
+                }
+                setSch(updatedSchedule);
+                setLoading(false);
+            }
+        } catch (err) {
+            console.log("Error in fetching schedule from local storage: ", err.message);
+        }
+    }
     useEffect(() => {
-        setCurrentDay(currentTime.getDay())
+        //setCurrentDay(currentTime.getDay())
         console.log("Current day:" + currentTime.getDay())
     }, [])
     useEffect(() => {
-
-        async function fetch() {
-            try {
-                const studentData = await AsyncStorage.getItem("student");
-                const student = JSON.parse(studentData);
-                name = student.name;
-                dept = student.dept;
-                sem = student.sem;
-                roll = student.roll;
-                console.log(name, dept);
-                setUserDetails((prev) => {
-                    return {
-                        name_n: name,
-                        dept_n: dept,
-                        sem_n: sem,
-                        roll_n: roll
-                    }
-                })
-                setUserLoading(false);
-            } catch (err) {
-                console.log("Error in Dashboard.js Fetching User details from async storage : ", err.message)
-            }
-        }
         fetch()
-
-        async function fetchScheduleFromLocalStorage() {
-            try {
-                const scheduleData = await AsyncStorage.getItem("schedule");
-                const classData = await AsyncStorage.getItem("classData");
-                if (classData == null) setStart(true)
-                if (scheduleData && classData) {
-                    const parsedSchedule = JSON.parse(scheduleData);
-                    const parsedClassData = JSON.parse(classData);
-                    var currentHour = timeToHour(currentTime.getHours(), currentTime.getMinutes()) || 1;
-                    console.log("Current hour : ", currentHour);
-                    setCurrentHour(currentHour);
-                    const updatedSchedule = {};
-                    const day = days[currentDay];
-                    console.log("Current day: ", currentDay);
-                    if (parsedSchedule[currentDay]) {
-                        updatedSchedule[day] = parsedSchedule[currentDay].map((courseNum, idx) => {
-                            if (courseNum !== -1) {
-                                const courseDetails = parsedClassData.find(course => course.CourseNo === courseNum);
-                                return {
-                                    ...courseDetails,
-                                    hour: idx + 1
-                                };
-                            }
-                            return null;
-                        }).filter(item => item !== null);
-                        updatedSchedule[day] = updatedSchedule[day].filter(item => item.hour >= currentHour);
-                        console.log(updatedSchedule);
-                    } else {
-                        updatedSchedule[day] = [];
-                        console.log("No schedule found for today");
-                    }
-                    setSch(updatedSchedule);
-                    setLoading(false);
-                }
-            } catch (err) {
-                console.log("Error in fetching schedule from local storage: ", err.message);
-            }
-        }
-
         fetchScheduleFromLocalStorage();
-
         getMiss()
 
     }, [])
-
+    useFocusEffect(
+        React.useCallback(() => {
+            getMiss()
+            fetch()
+            fetchScheduleFromLocalStorage();
+        }, [])
+    );
     const navigate = useNavigation()
 
     const formattedTime = currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });

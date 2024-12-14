@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Modal, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -116,106 +116,139 @@ export default function App() {
     );
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Add a Course</Text>
-            <View style={styles.form}>
-                <Text style={styles.text}>Course Name</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter Course Name"
-                    value={courseName}
-                    onChangeText={setCourseName}
-                />
-                {error.courseName && <Text style={styles.err}>{error.courseName}</Text>}
-                <Text style={styles.text}>Type</Text>
-                <DropDownPicker
-                    open={openType}
-                    value={type}
-                    items={types}
-                    setOpen={setOpenType}
-                    setValue={setType}
-                    setItems={setTypes}
-                    placeholder="Select Type"
-                    style={styles.input}
-                    dropDownContainerStyle={[styles.dropDown, { zIndex: 1000 }]}
-                />
-                {error.type && <Text style={styles.err}>{error.type}</Text>}
+        <ScrollView style={styles.mainview}>
+            <View style={styles.container}>
+                <Text style={styles.header}>Add a Course</Text>
+                <View style={styles.form}>
+                    <Text style={styles.text}>Course Name</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter Course Name"
+                        value={courseName}
+                        onChangeText={setCourseName}
+                    />
+                    {error.courseName && <Text style={styles.err}>{error.courseName}</Text>}
 
-                <Text style={styles.text}>Faculty Name</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter Faculty Name"
-                    value={faculty}
-                    onChangeText={setFaculty}
-                />
-                {error.faculty && <Text style={styles.err}>{error.faculty}</Text>}
+                    <View style={[styles.input, { flexDirection: 'row', alignItems: 'center', borderWidth: 0 }]}>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center', marginRight: 20 }}
+                            onPress={() => setType('Theory')}
+                        >
+                            <View style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 10,
+                                borderWidth: 2,
+                                borderColor: '#D3D3D3',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: type === 'Theory' ? '#B0B0B0' : 'transparent',
+                            }} />
+                            <Text style={{ marginLeft: 8, fontSize: 16 }}>Theory</Text>
+                        </TouchableOpacity>
 
-                <Text style={styles.text}>Location</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter Location"
-                    value={location}
-                    onChangeText={setLocation}
-                />
-                {error.location && <Text style={styles.err}>{error.location}</Text>}
-
-                <Text style={styles.text}>Hours</Text>
-                <DropDownPicker
-                    open={openCredit}
-                    value={credit}
-                    items={credits}
-                    setOpen={setOpenCredit}
-                    setValue={setCredit}
-                    setItems={setCredits}
-                    placeholder="Select Hours"
-                    style={styles.input}
-                    dropDownContainerStyle={[styles.dropDown, { zIndex: 2000 }]}
-                />
-                {error.credit && <Text style={styles.err}>{error.credit}</Text>}
-
-                <Button
-                    title="Select Hours"
-                    onPress={() => setModalVisible(true)}
-                    disabled={!credit}
-                />
-                <Button
-                    title="Add Course"
-                    onPress={handleSubmit}
-                    disabled={selectedHours.length !== credit}
-                />
-            </View>
-
-            <Modal
-                visible={modalVisible}
-                animationType="fade"
-                transparent={true} // Transparent background for the modal
-                onRequestClose={() => setModalVisible(false)} // Close the modal when back button is pressed
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalHeader}>Select {credit} Hours</Text>
-                        <ScrollView>{renderGrid()}</ScrollView>
-                        <View style={styles.modalButtons}>
-                            <Pressable style={styles.applyButton} onPress={() => setModalVisible(false)}>
-                                <Text style={styles.buttonText}>APPLY</Text>
-                            </Pressable>
-
-                        </View>
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', alignItems: 'center' }}
+                            onPress={() => setType('Lab')}
+                        >
+                            <View style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 10,
+                                borderWidth: 2,
+                                borderColor: '#D3D3D3',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: type === 'Lab' ? '#B0B0B0' : 'transparent',
+                            }} />
+                            <Text style={{ marginLeft: 8, fontSize: 16 }}>Lab</Text>
+                        </TouchableOpacity>
                     </View>
+
+                    {error.type && <Text style={styles.err}>{error.type}</Text>}
+
+                    <Text style={styles.text}>Faculty Name</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter Faculty Name"
+                        value={faculty}
+                        onChangeText={setFaculty}
+                    />
+                    {error.faculty && <Text style={styles.err}>{error.faculty}</Text>}
+
+                    <Text style={styles.text}>Location</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter Location"
+                        value={location}
+                        onChangeText={setLocation}
+                    />
+                    {error.location && <Text style={styles.err}>{error.location}</Text>}
+
+                    <Text style={styles.text}>Hours</Text>
+                    <DropDownPicker
+                        open={openCredit}
+                        value={credit}
+                        items={credits}
+                        setOpen={setOpenCredit}
+                        setValue={setCredit}
+                        setItems={setCredits}
+                        placeholder="Select Hours"
+                        style={styles.input}
+                        dropDownContainerStyle={[styles.dropDown, { zIndex: 2000 }]}
+                    />
+                    {error.credit && <Text style={styles.err}>{error.credit}</Text>}
+
+                    <Button
+                        title="Select Hours"
+                        onPress={() => setModalVisible(true)}
+                        disabled={!credit}
+                    />
+                    <Button
+                        title="Add Course"
+                        onPress={handleSubmit}
+                        disabled={selectedHours.length !== credit}
+                    />
                 </View>
 
-            </Modal >
+                <Modal
+                    visible={modalVisible}
+                    animationType="fade"
+                    transparent={true} // Transparent background for the modal
+                    onRequestClose={() => setModalVisible(false)} // Close the modal when back button is pressed
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalHeader}>Select {credit} Hours</Text>
+                            <ScrollView>{renderGrid()}</ScrollView>
+                            <View style={styles.modalButtons}>
+                                <Pressable style={styles.applyButton} onPress={() => setModalVisible(false)}>
+                                    <Text style={styles.buttonText}>APPLY</Text>
+                                </Pressable>
 
-            <StatusBar style="auto" />
-        </View >
+                            </View>
+                        </View>
+                    </View>
+
+                </Modal >
+
+                <StatusBar style="auto" />
+            </View >
+        </ScrollView >
     );
 }
 const styles = StyleSheet.create({
+    mainview: {
+        backgroundColor: '#123456',
+        height: '100%',
+        flex: 1
+    },
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#123456',
+        height: '100%',
     },
     dayLabel: {
         fontSize: 16,
@@ -230,7 +263,7 @@ const styles = StyleSheet.create({
     header: {
         fontSize: 28,
         fontWeight: 'bold',
-        marginBottom: 20,
+        margin: 20,
         color: '#FFF',
     },
     form: {

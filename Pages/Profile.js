@@ -1,4 +1,4 @@
-import { View, Text, Image, Modal, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, Image, Modal, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MaterialIcons, Feather, FontAwesome, Entypo, } from '@expo/vector-icons';
@@ -107,14 +107,15 @@ const Profile = () => {
                 }));
             }
             setEditDialogVisible(false);
-            //navigator.navigate("Dashboard");
+
+            navigator.navigate("Dashboard");
         } catch (err) {
             console.log("ERROR: error in saving name", err.message);
         }
     };
 
     return (
-        <View>
+        <ScrollView>
             <View>
                 <View style={styles.topContainer}>
                     <View>
@@ -272,7 +273,7 @@ const Profile = () => {
                     </View>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
