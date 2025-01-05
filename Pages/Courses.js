@@ -55,11 +55,26 @@ const CoursesDisplay = () => {
 
     const deleteCourse = async (courseName) => {
         try {
+            console.log("course to deleted :", courseName)
             const data = await AsyncStorage.getItem("classData");
             if (data) {
                 const parsedData = JSON.parse(data);
+
+                const CourseNo = parsedData.find((course) => course.courseName === courseName).CourseNo;
                 const updatedData = parsedData.filter((course) => course.courseName !== courseName);
                 await AsyncStorage.setItem("classData", JSON.stringify(updatedData));
+                const scheduleData = await AsyncStorage.getItem("schedule");
+                console.log("Course num : ", CourseNo)
+                if (scheduleData) {
+                    const parsedScheduleData = JSON.parse(scheduleData);
+                    const updatedScheduleData = parsedScheduleData.map((schedule) => {
+                        return schedule.map((courseNum) => (courseNum === CourseNo ? -1 : courseNum));
+                    });
+                    await AsyncStorage.setItem("schedule", JSON.stringify(updatedScheduleData));
+                    console.log("Schedule modified");
+                    console.log(updatedScheduleData);
+                }
+                console.log("deleted")
                 GetCourses();
             }
         } catch (err) {

@@ -367,7 +367,19 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: "flex-start",
         marginVertical: 5,
+        minWidth: "70%",
+        maxWidth: "100%"
+    },
+    dayLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        alignContent: 'center',
+        justifyContent: "flex-start",
+        textAlign: 'left',
+        width: 35,
+        marginRight: 0
     },
     cell: {
         width: 25,
