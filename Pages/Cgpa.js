@@ -204,7 +204,7 @@ const Cgpa = () => {
                         ))}
 
                         <Button title="Generate Inputs" onPress={generateGradeInputs} />
-
+                        <View style={{ marginVertical: 5 }} />
                         {/* Grade Inputs */}
                         {grades.map((grade, idx) => (
 
@@ -230,6 +230,7 @@ const Cgpa = () => {
                         ))}
 
                         <Button title="Calculate GPA" onPress={calculateGpa} />
+                        <View style={{ marginVertical: 5 }} />
                         <Button title="Close" onPress={handleClose} />
                     </View>
                 </ScrollView>

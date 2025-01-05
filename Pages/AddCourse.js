@@ -40,7 +40,7 @@ export default function App() {
     useEffect(() => {
         const backAction = () => {
             navigator.navigate('Courses');
-            return true;
+            //return true;
         };
 
         const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
@@ -219,6 +219,7 @@ export default function App() {
                         onPress={() => setModalVisible(true)}
                         disabled={!credit}
                     />
+                    <View style={{ marginVertical: 5 }} />
                     <Button
                         title="Add Course"
                         onPress={handleSubmit}
