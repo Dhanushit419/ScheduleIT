@@ -37,13 +37,13 @@ const BunkManager = () => {
 
     const calculateAveragePercentage = () => {
         let totalPercentage = 0;
-        Att.forEach((row) => {
-            const total = row.type === "Theory" ? 45 : 60;
+        Att && Att.forEach((row) => {
+            const total = parseInt(row.credit) * 15;
             const missed = parseInt(row.classesMissed);
             const percentage = ((total - missed) / total) * 100;
             totalPercentage += percentage;
         });
-        const averagePercentage = totalPercentage / Att.length;
+        const averagePercentage = Att && Att.length > 0 ? totalPercentage / Att.length : 0;
         console.log('Calculated average percentage:', averagePercentage);
         setAveragePercentage(averagePercentage);
     };
@@ -186,251 +186,257 @@ const BunkManager = () => {
                     </View>
                 </View>
             </View>
-            <View style={styles.midContainer}>
-                {Att.map((row, index) => {
-                    const total = row.type === 'Lab' ? 60 : 45;
-                    const missed = parseInt(row.classesMissed);
-                    const Percentage = ((total - missed) / total) * 100;
-                    const skip = row.type === 'Lab' ? 15 : 11;
+            {!Att || Att.length === 0 ? <Text style={{ flex: 1, justifyContent: "center", textAlign: "center", fontSize: 20 }}>No data available</Text> : <View>
 
-                    return (
-                        <Pressable onPress={() => handleBoxPress(index)} key={index}>
-                            <View style={[styles.Box, { height: pressedIndex === index ? 130 : 80 }]}>
-                                <View style={{ flexDirection: "column" }}>
-                                    <Pressable style={{ marginBottom: pressedIndex === index ? 20 : 0 }}>
-                                        {row.type === "Theory" && row.name !== "Open Elective" ? <Ionicons name="book" size={24} color="black" /> : null}
-                                        {row.type === "Lab" ? <Ionicons name="laptop" size={24} /> : null}
-                                        {row.name === "Open Elective" ? <Ionicons name="bulb" size={24} color="black" /> : null}
-                                    </Pressable>
-                                    {pressedIndex === index ? <Pressable onPress={() => handleView(row.CourseNo)}>
-                                        <MaterialCommunityIcons name="comment-edit" size={27} color="black" />
+                <View style={styles.midContainer}>
+                    {Att.map((row, index) => {
+                        const total = parseInt(row.credit) * 15;
+                        const missed = parseInt(row.classesMissed);
+                        const Percentage = ((total - missed) / total) * 100;
 
-                                    </Pressable> : null
-                                    }
+                        const skip = Math.floor(total * 0.25);
+
+                        return (
+                            <Pressable onPress={() => handleBoxPress(index)} key={index}>
+                                <View style={[styles.Box, { height: pressedIndex === index ? 130 : 80 }]}>
+                                    <View style={{ flexDirection: "column" }}>
+                                        <Pressable style={{ marginBottom: pressedIndex === index ? 20 : 0 }}>
+                                            {row.type === "Theory" && row.name !== "Open Elective" ? <Ionicons name="book" size={24} color="black" /> : null}
+                                            {row.type === "Lab" ? <Ionicons name="laptop" size={24} /> : null}
+                                            {row.name === "Open Elective" ? <Ionicons name="bulb" size={24} color="black" /> : null}
+                                        </Pressable>
+                                        {pressedIndex === index ? <Pressable onPress={() => handleView(row.CourseNo)}>
+                                            <MaterialCommunityIcons name="comment-edit" size={27} color="black" />
+                                        </Pressable> : null}
+                                    </View>
+
+                                    <View style={styles.mid}>
+                                        <Pressable onPress={() => handleClose(index)}>
+                                            <Text style={[styles.subjectText, {
+                                                fontSize: pressedIndex === index ? 21 : 18,
+                                                transform: [{ translateY: pressedIndex === index ? -15 : 0 }],
+                                                justifyContent: "center",
+                                                maxWidth: "80%",
+                                                minWidth: "80%",
+                                                textAlign: "center",
+
+                                            }]} numberOfLines={1} ellipsizeMode="tail">{row.courseName}</Text>
+                                        </Pressable>
+                                        {pressedIndex === index ? (
+                                            <View style={styles.details}>
+                                                <Text>Classes Missed: {missed}</Text>
+                                                <Text>{skip - missed === 0 ? "No skips left" : `Skips Left: ${skip - missed}`}</Text>
+                                                <Text>Percentage: {Percentage.toFixed(0)}</Text>
+                                            </View>
+                                        ) : null}
+                                    </View>
+                                    <View style={styles.right}>
+                                        {pressedIndex === index ? (
+                                            <View style={styles.rightPressed}>
+                                                <Pressable onPress={() => handleMissed(index, skip, "add")}>
+                                                    <View style={styles.iconBox}><Ionicons name="add" size={30} /></View>
+                                                </Pressable>
+                                                <Pressable onPress={() => handleMissed(index, skip, "remove")}>
+                                                    <View style={styles.iconBox}><Ionicons name="remove" size={30} /></View>
+                                                </Pressable>
+                                            </View>
+                                        ) : (
+                                            <Text style={{ fontSize: 18 }}>{Percentage.toFixed(0)}%</Text>
+                                        )}
+                                    </View>
                                 </View>
-
-                                <View style={styles.mid}>
-                                    <Pressable onPress={() => handleClose(index)}>
-                                        <Text style={[styles.subjectText, {
-                                            fontSize: pressedIndex === index ? 21 : 18,
-                                            transform: [{ translateY: pressedIndex === index ? -15 : 0 }],
-                                            justifyContent: "center",
-                                        }]}>{row.courseName}</Text>
-                                    </Pressable>
-                                    {pressedIndex === index ? (
-                                        <View style={styles.details}>
-                                            <Text>Classes Missed: {missed}</Text>
-                                            <Text>{skip - missed === 0 ? "No skips left" : `Skips Left: ${skip - missed}`}</Text>
-                                            <Text>Percentage: {Percentage.toFixed(0)}</Text>
-                                        </View>
-                                    ) : null}
-                                </View>
-                                <View style={styles.right}>
-                                    {pressedIndex === index ? (
-                                        <View style={styles.rightPressed}>
-                                            <Pressable onPress={() => handleMissed(index, skip, "add")}>
-                                                <View style={styles.iconBox}><Ionicons name="add" size={30} /></View>
-                                            </Pressable>
-                                            <Pressable onPress={() => handleMissed(index, skip, "remove")}>
-                                                <View style={styles.iconBox}><Ionicons name="remove" size={30} /></View>
-                                            </Pressable>
-                                        </View>
-                                    ) : (
-                                        <Text style={{ fontSize: 18 }}>{Percentage.toFixed(0)}%</Text>
-                                    )}
-                                </View>
-                            </View>
-                        </Pressable>
-                    );
-                })}
-            </View>
-            <Modal
-                visible={modalVisible}
-                animationType="fade"
-                transparent={true}
-                onRequestClose={() => setModalVisible(false)}
-            >
-
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-                    }}
-                //onPress={() => setModalVisible(false)}
+                            </Pressable>
+                        );
+                    })}
+                </View>
+                <Modal
+                    visible={modalVisible}
+                    animationType="fade"
+                    transparent={true}
+                    onRequestClose={() => setModalVisible(false)}
                 >
+
                     <View
                         style={{
-                            width: '90%',
-                            backgroundColor: 'white',
-                            borderRadius: 10,
-                            padding: 20,
-                            elevation: 10,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.25,
-                            shadowRadius: 4,
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
                         }}
-                    >
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Bunk Details {selectedCourseData.length !== 0 && selectedCourseData[0].courseName ? <Text>- {selectedCourseData[0].courseName}</Text> : null}</Text>
-                        {selectedCourseData.length === 0 ? (
-                            <Text>No classes missed</Text>
-                        ) : (
-                            <View>
-                                {/* Table Header */}
-                                <View
-                                    style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
-                                        backgroundColor: '#f0f0f0',
-                                        padding: 10,
-                                        borderBottomWidth: 1,
-                                        borderBottomColor: '#ddd',
-                                    }}
-                                >
-                                    <Text style={{ flex: 1, fontWeight: 'bold' }}>Date</Text>
-                                    <Text style={{ flex: 1, fontWeight: 'bold' }}>No. of Hours</Text>
-                                    <Text style={{ flex: 1, fontWeight: 'bold' }}>View/Edit Reason</Text>
-                                </View>
-                                {/* Table Body */}
-                                {selectedCourseData.map((data, idx) => (
-                                    <View
-                                        key={idx}
-                                        style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            padding: 10,
-                                            borderBottomWidth: 1,
-                                            borderBottomColor: '#eee',
-                                        }}
-                                    >
-                                        <Text style={{ flex: 1 }}>{data.date}</Text>
-                                        <Text style={{ flex: 1 }}>{data.hours}</Text>
-                                        <Pressable
-                                            style={{ flex: 1 }}
-                                            onPress={() => {
-                                                setReasonEditIndex(idx);
-                                                setNewReason(data.reason || '');
-                                            }}
-                                        >
-                                            <Text
-                                                style={{
-                                                    color: data.reason ? 'gray' : 'blue',
-                                                    textDecorationLine: data.reason ? 'none' : 'underline',
-                                                }}
-                                            >
-                                                {data.reason ? data.reason : 'Add a reason'}
-                                            </Text>
-                                        </Pressable>
-                                    </View>
-                                ))}
-                            </View>
-                        )}
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: '#2196F3',
-                                padding: 10,
-                                borderRadius: 5,
-                                alignItems: 'center',
-                                width: "30%",
-                                justifyContent: 'center',
-                                alignSelf: 'center',
-                                marginTop: 20,
-                            }}
-                            onPress={() => setModalVisible(false)}
-                        >
-                            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-
-
-
-                </View>
-
-                {/* Dialog Box for Editing Reason */}
-                {reasonEditIndex !== -1 && (
-                    <Modal
-                        transparent={true}
-                        visible={true}
-                        animationType="slide"
-                        onRequestClose={() => setReasonEditIndex(-1)}
+                    //onPress={() => setModalVisible(false)}
                     >
                         <View
                             style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+                                width: '90%',
+                                backgroundColor: 'white',
+                                borderRadius: 10,
+                                padding: 20,
+                                elevation: 10,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 4,
                             }}
+                        >
+                            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Bunk Details {selectedCourseData.length !== 0 && selectedCourseData[0].courseName ? <Text>- {selectedCourseData[0].courseName}</Text> : null}</Text>
+                            {selectedCourseData.length === 0 ? (
+                                <Text>No classes missed</Text>
+                            ) : (
+                                <View>
+                                    {/* Table Header */}
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
+                                            backgroundColor: '#f0f0f0',
+                                            padding: 10,
+                                            borderBottomWidth: 1,
+                                            borderBottomColor: '#ddd',
+                                        }}
+                                    >
+                                        <Text style={{ flex: 1, fontWeight: 'bold' }}>Date</Text>
+                                        <Text style={{ flex: 1, fontWeight: 'bold' }}>No. of Hours</Text>
+                                        <Text style={{ flex: 1, fontWeight: 'bold' }}>View/Edit Reason</Text>
+                                    </View>
+                                    {/* Table Body */}
+                                    {selectedCourseData.map((data, idx) => (
+                                        <View
+                                            key={idx}
+                                            style={{
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-between',
+                                                padding: 10,
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: '#eee',
+                                            }}
+                                        >
+                                            <Text style={{ flex: 1 }}>{data.date}</Text>
+                                            <Text style={{ flex: 1 }}>{data.hours}</Text>
+                                            <Pressable
+                                                style={{ flex: 1 }}
+                                                onPress={() => {
+                                                    setReasonEditIndex(idx);
+                                                    setNewReason(data.reason || '');
+                                                }}
+                                            >
+                                                <Text
+                                                    style={{
+                                                        color: data.reason ? 'gray' : 'blue',
+                                                        textDecorationLine: data.reason ? 'none' : 'underline',
+                                                    }}
+                                                >
+                                                    {data.reason ? data.reason : 'Add a reason'}
+                                                </Text>
+                                            </Pressable>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: '#2196F3',
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    alignItems: 'center',
+                                    width: "30%",
+                                    justifyContent: 'center',
+                                    alignSelf: 'center',
+                                    marginTop: 20,
+                                }}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+
+
+
+                    </View>
+
+                    {/* Dialog Box for Editing Reason */}
+                    {reasonEditIndex !== -1 && (
+                        <Modal
+                            transparent={true}
+                            visible={true}
+                            animationType="slide"
+                            onRequestClose={() => setReasonEditIndex(-1)}
                         >
                             <View
                                 style={{
-                                    width: '80%',
-                                    backgroundColor: 'white',
-                                    borderRadius: 10,
-                                    padding: 20,
-                                    elevation: 10,
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.25,
-                                    shadowRadius: 4,
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
                                 }}
                             >
-                                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Edit Reason</Text>
-                                <TextInput
-                                    style={{
-                                        height: 40,
-                                        borderColor: '#ddd',
-                                        borderWidth: 1,
-                                        marginBottom: 10,
-                                        paddingHorizontal: 10,
-                                        borderRadius: 5,
-                                    }}
-                                    placeholder="Enter Reason"
-                                    value={newReason}
-                                    onChangeText={setNewReason}
-                                />
                                 <View
                                     style={{
-                                        flexDirection: 'row',
-                                        justifyContent: 'space-between',
+                                        width: '80%',
+                                        backgroundColor: 'white',
+                                        borderRadius: 10,
+                                        padding: 20,
+                                        elevation: 10,
+                                        shadowColor: '#000',
+                                        shadowOffset: { width: 0, height: 2 },
+                                        shadowOpacity: 0.25,
+                                        shadowRadius: 4,
                                     }}
                                 >
-                                    <Pressable
+                                    <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Edit Reason</Text>
+                                    <TextInput
                                         style={{
-                                            backgroundColor: 'blue',
-                                            padding: 10,
+                                            height: 40,
+                                            borderColor: '#ddd',
+                                            borderWidth: 1,
+                                            marginBottom: 10,
+                                            paddingHorizontal: 10,
                                             borderRadius: 5,
-                                            flex: 0.45,
-                                            alignItems: 'center',
                                         }}
-                                        onPress={() => {
-                                            handleReasonUpdate(reasonEditIndex);
-                                            setReasonEditIndex(-1);
+                                        placeholder="Enter Reason"
+                                        value={newReason}
+                                        onChangeText={setNewReason}
+                                    />
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'space-between',
                                         }}
                                     >
-                                        <Text style={{ color: 'white' }}>Save</Text>
-                                    </Pressable>
-                                    <Pressable
-                                        style={{
-                                            backgroundColor: 'gray',
-                                            padding: 10,
-                                            borderRadius: 5,
-                                            flex: 0.45,
-                                            alignItems: 'center',
-                                        }}
-                                        onPress={() => setReasonEditIndex(-1)}
-                                    >
-                                        <Text style={{ color: 'white' }}>Cancel</Text>
-                                    </Pressable>
+                                        <Pressable
+                                            style={{
+                                                backgroundColor: 'blue',
+                                                padding: 10,
+                                                borderRadius: 5,
+                                                flex: 0.45,
+                                                alignItems: 'center',
+                                            }}
+                                            onPress={() => {
+                                                handleReasonUpdate(reasonEditIndex);
+                                                setReasonEditIndex(-1);
+                                            }}
+                                        >
+                                            <Text style={{ color: 'white' }}>Save</Text>
+                                        </Pressable>
+                                        <Pressable
+                                            style={{
+                                                backgroundColor: 'gray',
+                                                padding: 10,
+                                                borderRadius: 5,
+                                                flex: 0.45,
+                                                alignItems: 'center',
+                                            }}
+                                            onPress={() => setReasonEditIndex(-1)}
+                                        >
+                                            <Text style={{ color: 'white' }}>Cancel</Text>
+                                        </Pressable>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    </Modal>
-                )}
-            </Modal>
+                        </Modal>
+                    )}
+                </Modal>
 
+            </View>}
         </ScrollView>
     );
 };

@@ -1,7 +1,7 @@
 import { View, Text, Image, Modal, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { MaterialIcons, Feather, FontAwesome, Entypo, } from '@expo/vector-icons';
+import { MaterialIcons, Feather, FontAwesome, Entypo, FontAwesome5, } from '@expo/vector-icons';
 import Iuri from "../assets/sample_profile.jpg";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -270,6 +270,18 @@ const Profile = () => {
                     <View style={styles.pressBox}>
                         <MaterialIcons name="logout" size={34} color="red" />
                         <Text style={styles.boxText}>Logout</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("FAQ")}>
+                    <View style={styles.pressBox} >
+                        <MaterialCommunityIcons name="frequently-asked-questions" size={34} />
+                        <Text style={styles.boxText}>FAQ</Text>
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnBoxes} onPress={() => navigator.navigate("About")}>
+                    <View style={styles.pressBox}>
+                        <FontAwesome5 name="laptop-code" size={32} color="black" />
+                        <Text style={styles.boxText}>About us</Text>
                     </View>
                 </TouchableOpacity>
             </View>

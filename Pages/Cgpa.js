@@ -18,6 +18,8 @@ const Cgpa = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedSem, setSelectedSem] = useState(null);
     const [inputs, setInputs] = useState({
+        eightCredit: 0,
+        sixCredit: 0,
         fourCredit: 0,
         threeCredit: 0,
         twoCredit: 0,
@@ -56,6 +58,8 @@ const Cgpa = () => {
         setSelectedSem(index);
         setShowModal(true);
         setInputs({
+            eightCredit: 0,
+            sixCredit: 0,
             fourCredit: 0,
             threeCredit: 0,
             twoCredit: 0,
@@ -83,13 +87,15 @@ const Cgpa = () => {
         console.log('Generating grade inputs...');
         let allGrades = [];
         const creditMapping = {
+            eightCredit: 8,
+            sixCredit: 6,
             fourCredit: 4,
             threeCredit: 3,
             twoCredit: 2,
             oneCredit: 1,
         };
 
-        ['fourCredit', 'threeCredit', 'twoCredit', 'oneCredit'].forEach(
+        ['eightCredit', 'sixCredit', 'fourCredit', 'threeCredit', 'twoCredit', 'oneCredit'].forEach(
             (key) => {
                 const creditValue = creditMapping[key]; // Correctly map the credit value
                 for (let i = 0; i < inputs[key]; i++) {
@@ -178,11 +184,11 @@ const Cgpa = () => {
                         </Text>
 
                         {/* Credit Inputs */}
-                        {[
-                            { key: 'fourCredit', label: '4-credit courses (4)' },
-                            { key: 'threeCredit', label: '3-credit courses (3)' },
-                            { key: 'twoCredit', label: '2-credit courses (2)' },
-                            { key: 'oneCredit', label: '1-credit courses (1)' },
+                        {[{ key: 'eightCredit', label: '8-credit courses (8)' }, { key: 'sixCredit', label: '6-credit courses (6)' },
+                        { key: 'fourCredit', label: '4-credit courses (4)' },
+                        { key: 'threeCredit', label: '3-credit courses (3)' },
+                        { key: 'twoCredit', label: '2-credit courses (2)' },
+                        { key: 'oneCredit', label: '1-credit courses (1)' },
                         ].map(({ key, label }, idx) => (
                             <View style={styles.inputRow} key={idx}>
                                 <Text>{label}:</Text>

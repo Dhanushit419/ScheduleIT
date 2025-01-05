@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Modal, Pressable, TouchableOpacity, ScrollView, BackHandler } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -37,6 +37,17 @@ export default function App() {
         fetchSchedule();
     }, []);
 
+    useEffect(() => {
+        const backAction = () => {
+            navigator.navigate('Courses');
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+        return () => backHandler.remove();
+    }, [navigator]);
+
     const validateForm = () => {
         const err = {};
         if (!courseName) err.courseName = 'Course Name is required.';
@@ -58,7 +69,6 @@ export default function App() {
     };
 
     const handleSubmit = async () => {
-
         if (validateForm()) {
             if (selectedHours.length !== credit) {
                 alert(`Please select exactly ${credit} hours.`);
@@ -185,18 +195,23 @@ export default function App() {
                     />
                     {error.location && <Text style={styles.err}>{error.location}</Text>}
 
-                    <Text style={styles.text}>Hours</Text>
-                    <DropDownPicker
-                        open={openCredit}
-                        value={credit}
-                        items={credits}
-                        setOpen={setOpenCredit}
-                        setValue={setCredit}
-                        setItems={setCredits}
-                        placeholder="Select Hours"
-                        style={styles.input}
-                        dropDownContainerStyle={[styles.dropDown, { zIndex: 2000 }]}
-                    />
+                    <Text style={styles.text}>Hours in a week</Text>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
+                        <TouchableOpacity
+                            style={{ padding: 10, backgroundColor: '#007bff', borderRadius: 5, marginRight: 10 }}
+                            onPress={() => setCredit(prev => Math.max(prev - 1, 1))}
+                        >
+                            <Text style={{ color: '#fff', fontSize: 18 }}>-</Text>
+                        </TouchableOpacity>
+                        <Text style={{ fontSize: 18 }}>{credit}</Text>
+                        <TouchableOpacity
+                            style={{ padding: 10, backgroundColor: '#007bff', borderRadius: 5, marginLeft: 10 }}
+                            onPress={() => setCredit(prev => prev + 1)}
+                        >
+                            <Text style={{ color: '#fff', fontSize: 18 }}>+</Text>
+                        </TouchableOpacity>
+                    </View>
                     {error.credit && <Text style={styles.err}>{error.credit}</Text>}
 
                     <Button
@@ -225,18 +240,17 @@ export default function App() {
                                 <Pressable style={styles.applyButton} onPress={() => setModalVisible(false)}>
                                     <Text style={styles.buttonText}>APPLY</Text>
                                 </Pressable>
-
                             </View>
                         </View>
                     </View>
-
-                </Modal >
+                </Modal>
 
                 <StatusBar style="auto" />
-            </View >
-        </ScrollView >
+            </View>
+        </ScrollView>
     );
 }
+
 const styles = StyleSheet.create({
     mainview: {
         backgroundColor: '#123456',
@@ -254,10 +268,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         alignContent: 'center',
-        //justifyContent: 'center',
-        // alignItems: 'center',
         textAlign: 'left',
-
         width: 40
     },
     header: {

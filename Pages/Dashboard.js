@@ -155,7 +155,7 @@ export default function DashBoard({ navigation }) {
                     }}>Welcome , </Text>
                     <Text style={styles.nametext}><Text style={{
                         fontSize: 30, fontFamily: "monospace",
-                    }}>{userDetails.name_n} </Text><Text>{userDetails.dept_n == "IT" ? "B.Tech " : "B.E "} {userDetails.dept_n}</Text></Text>
+                    }}>{userDetails.name_n} </Text><Text>{userDetails.dept_n == "IT" || userDetails.dept_n == "Information Technology" ? "B.Tech " : "B.E "} {userDetails.dept_n}</Text></Text>
                 </View>}
                 {/* second view for 3 boxes */}
                 {start ? <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>

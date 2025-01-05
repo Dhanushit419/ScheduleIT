@@ -13,7 +13,8 @@ import Courses from './Pages/Courses';
 import AddCourse from './Pages/AddCourse';
 import BunkManager from './Pages/BunkManager';
 import Schedule from './Pages/Schedule';
-
+import AboutDevelopers from './Pages/About';
+import FAQPage from './Pages/Faq';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -76,7 +77,11 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName={isRegistered ? "MainTabs" : "Register"}>
-        <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen
+          name="Register"
+          component={Register}
+          options={{ headerLeft: null }} // Disable back button
+        />
         <Stack.Screen
           name="MainTabs"
           component={MainTabs}
@@ -87,6 +92,8 @@ export default function App() {
         <Stack.Screen name="AddCourses" component={AddCourse} />
         <Stack.Screen name="BunkManager" component={BunkManager} />
         <Stack.Screen name="Schedule" component={Schedule} />
+        <Stack.Screen name="About" component={AboutDevelopers} />
+        <Stack.Screen name="FAQ" component={FAQPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
