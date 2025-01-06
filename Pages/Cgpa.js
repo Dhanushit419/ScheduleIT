@@ -8,6 +8,7 @@ import {
     Button,
     TextInput,
     ScrollView,
+    Alert
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -150,7 +151,35 @@ const Cgpa = () => {
 
         setShowModal(false);
     };
+    const resetCgpa = () => {
+        Alert.alert(
+            "Reset CGPA",
+            "Are you sure you want to reset your GPA Records and CGPA?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "OK",
+                    onPress: async () => {
+                        try {
+                            setCgpaVal(0);
+                            setCgpa(Array(8).fill(0));
+                            await AsyncStorage.removeItem('cgpa');
+                            await AsyncStorage.setItem('cgpa', JSON.stringify(Array(8).fill(0)));
 
+                            console.log('CGPA reset successfully.');
+                        } catch (error) {
+                            console.error('Error resetting CGPA:', error);
+                        }
+                    }
+                }
+            ]
+        );
+        console.log('done');
+
+    }
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.cgpaContainer}>
@@ -168,6 +197,11 @@ const Cgpa = () => {
                         </TouchableOpacity>
                     ))}
                 </View>
+
+                <Button title="Reset" onPress={resetCgpa}>
+                    Reset
+                </Button>
+
             </View>
 
             {/* Modal for GPA Calculation */}
@@ -245,6 +279,8 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     cgpaContainer: {
+        flex: 1,
+        justifyContent: 'space-around',
         marginBottom: 20,
     },
     cgpaTitle: {

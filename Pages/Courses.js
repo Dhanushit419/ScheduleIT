@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView, Alert } from 'react-native'
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView, Alert, Modal, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -13,6 +13,8 @@ const CoursesDisplay = () => {
     const [labCourses, setLabCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [noCourses, setNoCourses] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [currentCourse, setCurrentCourse] = useState({});
 
     const GetCourses = async () => {
         console.log("get courses");
@@ -82,6 +84,33 @@ const CoursesDisplay = () => {
         }
     };
 
+    const editCourse = (course) => {
+        setCurrentCourse({ ...course });
+        console.log(course)
+        setModalVisible(true);
+    };
+
+    const saveCourse = async () => {
+        try {
+            const data = await AsyncStorage.getItem("classData");
+            if (data) {
+                const parsedData = JSON.parse(data);
+                const updatedData = parsedData.map((course) => {
+                    if (course.CourseNo === currentCourse.CourseNo) {
+                        return { ...course, ...currentCourse };
+                    }
+                    return course;
+                });
+                await AsyncStorage.setItem("classData", JSON.stringify(updatedData));
+                setModalVisible(false);
+                GetCourses();
+                console.log("saved")
+            }
+        } catch (err) {
+            console.log("Error in saving course", err.message);
+        }
+    };
+
     useEffect(() => {
         GetCourses();
     }, []);
@@ -120,10 +149,34 @@ const CoursesDisplay = () => {
                             theoryCourses.map((course, ind) => (
                                 <View style={styles.courseBox} key={ind}>
                                     <Text style={styles.courseText}>{course.courseName}</Text>
+                                    <Text style={styles.facultyText}>{course.faculty}</Text>
                                     <View style={styles.courseRow}>
-                                        <Text style={styles.facultyText}>{course.faculty}</Text>
-                                        <Pressable onPress={() => confirmDelete(course.courseName)}>
-                                            <MaterialIcons name="delete" size={24} color="grey" />
+                                        <Pressable
+                                            onPress={() => editCourse(course)}
+                                            style={({ pressed }) => [
+                                                {
+                                                    padding: 3,
+                                                    borderRadius: 5,
+                                                    backgroundColor: pressed ? "#e0e0e0" : "#f0f0f0", // Hover effect
+                                                    elevation: 2,
+
+                                                }
+                                            ]}
+                                        >
+                                            <MaterialIcons name="edit" size={22} color="grey" />
+                                        </Pressable>
+                                        <Pressable
+                                            onPress={() => confirmDelete(course.courseName)}
+                                            style={({ pressed }) => [
+                                                {
+                                                    padding: 3,
+                                                    borderRadius: 5,
+                                                    backgroundColor: pressed ? "#e0e0e0" : "#f0f0f0", // Hover effect
+                                                    elevation: 2,
+                                                }
+                                            ]}
+                                        >
+                                            <MaterialIcons name="delete" size={22} color="grey" />
                                         </Pressable>
                                     </View>
                                 </View>
@@ -147,10 +200,34 @@ const CoursesDisplay = () => {
                             labCourses.map((course, ind) => (
                                 <View style={styles.courseBox} key={100 + ind}>
                                     <Text style={styles.courseText}>{course.courseName}</Text>
+                                    <Text style={styles.facultyText}>{course.faculty}</Text>
                                     <View style={styles.courseRow}>
-                                        <Text style={styles.facultyText}>{course.faculty}</Text>
-                                        <Pressable onPress={() => confirmDelete(course.courseName)}>
-                                            <MaterialIcons name="delete" size={24} color="grey" />
+                                        <Pressable
+                                            onPress={() => editCourse(course)}
+                                            style={({ pressed }) => [
+                                                {
+                                                    padding: 3,
+                                                    borderRadius: 5,
+                                                    backgroundColor: pressed ? "#e0e0e0" : "#f0f0f0", // Hover effect
+                                                    elevation: 2,
+
+                                                }
+                                            ]}
+                                        >
+                                            <MaterialIcons name="edit" size={22} color="grey" />
+                                        </Pressable>
+                                        <Pressable
+                                            onPress={() => confirmDelete(course.courseName)}
+                                            style={({ pressed }) => [
+                                                {
+                                                    padding: 3,
+                                                    borderRadius: 5,
+                                                    backgroundColor: pressed ? "#e0e0e0" : "#f0f0f0", // Hover effect
+                                                    elevation: 2,
+                                                }
+                                            ]}
+                                        >
+                                            <MaterialIcons name="delete" size={22} color="grey" />
                                         </Pressable>
                                     </View>
                                 </View>
@@ -169,6 +246,44 @@ const CoursesDisplay = () => {
             >
                 <Ionicons name="add" size={45} color="white" />
             </Pressable>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalHeader}>Edit Course Details</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Course Name"
+                            value={currentCourse.courseName}
+                            onChangeText={(text) => setCurrentCourse({ ...currentCourse, courseName: text })}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Faculty Name"
+                            value={currentCourse.faculty}
+                            onChangeText={(text) => setCurrentCourse({ ...currentCourse, faculty: text })}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Location"
+                            value={currentCourse.location}
+                            onChangeText={(text) => setCurrentCourse({ ...currentCourse, location: text })}
+                        />
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => saveCourse()}
+                        >
+                            <Text style={styles.textStyle}>Save</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
@@ -184,9 +299,17 @@ const styles = StyleSheet.create({
         margin: 13,
     },
     headText: {
+        // Increase the size
         fontSize: 20,
         fontWeight: "bold",
+        color: "rgba(0, 0, 0, 0.7)", // Change the color to lighter black
+        textAlign: "left", // Center align the text
+        textTransform: "uppercase", // Make text uppercase
+        textShadowColor: "rgba(0, 0, 0, 0.2)", // Add shadow
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
     },
+
     sectionBody: {
         display: "flex",
         flexDirection: "row",
@@ -198,7 +321,7 @@ const styles = StyleSheet.create({
         marginLeft: 13,
     },
     courseBox: {
-        padding: 25,
+        padding: 15,
         backgroundColor: "#F2EFE5",
         borderRadius: 15,
         flexBasis: "45%",
@@ -210,8 +333,9 @@ const styles = StyleSheet.create({
     },
     courseRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "space-around",
         alignItems: "center",
+        marginTop: 10,
     },
     facultyText: {
         fontSize: 15,
@@ -225,6 +349,52 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 7,
         marginBottom: 20,
+    }, modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        width: '85%',
+        backgroundColor: '#F2EFE5',
+        padding: 20,
+        borderRadius: 15,
+        elevation: 8,
+        alignItems: 'center',
+    },
+    modalHeader: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 15,
+        color: '#333',
+    },
+    buttonClose: {
+        backgroundColor: "green",
+        borderRadius: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        marginTop: 20,
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center",
+        fontSize: 16,
+    },
+    input: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 5,
+        marginBottom: 15,
+        width: '100%',
+        paddingHorizontal: 10,
+    },
+    button: {
+        padding: 10,
+        borderRadius: 10,
     },
 });
 

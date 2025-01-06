@@ -13,7 +13,7 @@ const faqData = [
     },
     {
         title: "Courses",
-        description: "This page displays your course details, including the course name, type, and faculty. You can also add/delete courses to your schedule."
+        description: "This page displays your course details, including the course name, type, and faculty. You can also add/edit/delete courses to your schedule."
     },
     {
         title: "Weekly Schedule",

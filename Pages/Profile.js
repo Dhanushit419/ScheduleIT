@@ -68,7 +68,12 @@ const Profile = () => {
     const reset = async () => {
         console.log("Reset process")
         try {
-            await AsyncStorage.clear();
+
+            // const keys = await AsyncStorage.getAllKeys();
+            // const items = await AsyncStorage.multiGet(keys);
+            // console.log(items);
+            await AsyncStorage.multiRemove(['student', 'schedule', 'classData', 'bunkData']);
+            //await AsyncStorage.clear();
             console.log("Cleared")
             logout()
         } catch (err) {

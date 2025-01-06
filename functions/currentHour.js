@@ -17,6 +17,9 @@ const timeToHour = (hh, mm) => {
         if ((hh > hour || (hh === hour && mm >= min)) && (hh < endHour || (hh === endHour && mm <= endMin))) {
             return i + 1;
         }
+        if (i > 0 && (hh < hour || (hh === hour && mm < min))) {
+            return i + 0.5;
+        }
     }
 
     return 9; // Day Over for today
